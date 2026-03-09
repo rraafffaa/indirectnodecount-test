@@ -56,9 +56,12 @@
         resource_group: "{{ resource_group }}"
         name: "{{ vm_name }}-nic"
         virtual_network: "{{ vm_name }}-vnet"
-        subnet: "{{ vm_name }}-subnet"
-        public_ip_name: "{{ vm_name }}-pip"
+        subnet_name: "{{ vm_name }}-subnet"
         security_group: "{{ vm_name }}-nsg"
+        ip_configurations:
+          - name: default
+            public_ip_address_name: "{{ vm_name }}-pip"
+            primary: true
 
     - name: Create VM
       azure.azcollection.azure_rm_virtualmachine:
