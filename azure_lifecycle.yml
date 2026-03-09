@@ -63,6 +63,17 @@
             public_ip_address_name: "{{ vm_name }}-pip"
             primary: true
 
+    - name: Generate ephemeral SSH key
+      ansible.builtin.command:
+        cmd: ssh-keygen -t rsa -b 2048 -f /tmp/lifecycle_key -N "" -q
+      args:
+        creates: /tmp/lifecycle_key
+
+    - name: Read public key
+      ansible.builtin.slurp:
+        src: /tmp/lifecycle_key.pub
+      register: ssh_pub_key
+
     - name: Create VM
       azure.azcollection.azure_rm_virtualmachine:
         resource_group: "{{ resource_group }}"
@@ -72,7 +83,7 @@
         ssh_password_enabled: false
         ssh_public_keys:
           - path: "/home/{{ admin_user }}/.ssh/authorized_keys"
-            key_data: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDummy_key_for_lifecycle_test"
+            key_data: "{{ ssh_pub_key.content | b64decode }}"
         network_interfaces: "{{ vm_name }}-nic"
         image:
           offer: RHEL
